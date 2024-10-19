@@ -15,7 +15,7 @@ import '@/assets/theme-overrides.css'
 
 export const createApp = ViteSSG(
   App,
-  { routes: router.getRoutes(), base: import.meta.env.BASE_URL },
+  { routes: router.getRoutes(), base: import.meta.env.VITE_BASE_URL },
   async ({ app, router, isClient }) => {
     if (isClient) {
       const PrimeVue = await import('primevue/config')
