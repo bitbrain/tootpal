@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createMemoryHistory } from 'vue-router'
 import Home from '@/views/Home.vue'
 import Search from '@/components/Search.vue'
 import { useAuthStore } from '@/stores/authStore'
@@ -18,7 +18,7 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createMemoryHistory(import.meta.env.BASE_URL),
   routes,
 })
 
