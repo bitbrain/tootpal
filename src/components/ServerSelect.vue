@@ -51,7 +51,7 @@ export default defineComponent({
 
     const serverOptions = computed(() => {
       return servers.value.map(server => ({
-        label: `${server.domain} (${formatNumber(server.total_users)} users)`,
+        label: `${server.domain} ${server.total_users ? `${formatNumber(server.total_users)} users)` : ''}`,
         value: `https://${server.domain}`,
       }))
     })

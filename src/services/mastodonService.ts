@@ -155,9 +155,7 @@ const mastodonService = {
     const response = await fetch('https://api.joinmastodon.org/servers')
     const data = await response.json()
     const instances = data as MastodonInstance[]
-    return instances
-      .filter(instance => instance.total_users > 0)
-      .sort((i1, i2) => i2.total_users - i1.total_users)
+    return instances.sort((i1, i2) => i2.total_users - i1.total_users)
   },
 }
 
