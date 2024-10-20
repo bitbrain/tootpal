@@ -37,21 +37,12 @@ Visit [https://bitbra.in/tootpal](https://bitbra.in/tootpal) to start using toot
 
 - **Profile Cards**: Each result displays the user's avatar, display name, username, and a recent toot.
 - **Follow Button**: Click "Follow" to start following the user directly.
-- **Pagination**: Navigate through multiple pages of results using the paginator at the bottom.
-- **Hidden Profiles**: Profiles you already follow or have blocked are hidden by default. Click "Show All" to view them.
 
 ## Security and Privacy
 
 - **OAuth Authentication**: TootPal uses Mastodon's OAuth 2.0 for secure authentication.
 - **Data Handling**: Your access token is securely stored during your session and is not shared with third parties.
 - **Permissions**: TootPal requests minimal permissions required to follow users on your behalf.
-
-## Feedback and Support
-
-We value your feedback! If you encounter any issues or have suggestions, please reach out to our support team:
-
-- **Email**: support@tootpal.com
-- **GitHub Issues**: [https://github.com/yourusername/tootpal/issues](https://github.com/yourusername/tootpal/issues)
 
 ## Contributing
 
