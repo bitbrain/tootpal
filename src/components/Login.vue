@@ -1,3 +1,46 @@
+<script lang="ts">
+import { defineComponent, ref } from 'vue'
+import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
+import InputText from 'primevue/inputtext'
+import { useAuthStore } from '@/stores/authStore'
+import authService from '@/services/authService'
+
+export default defineComponent({
+  name: 'Login',
+  components: {
+    Button,
+    Dialog,
+    InputText,
+  },
+  setup() {
+    const authStore = useAuthStore()
+    const showLoginDialog = ref(false)
+    const instanceUrl = ref('https://')
+
+    const login = async () => {
+      if (instanceUrl.value) {
+        try {
+          await authService.startOAuthFlow(
+            instanceUrl.value.trim().replace(/\/$/, ''),
+            authStore,
+          )
+          showLoginDialog.value = false
+        } catch (error) {
+          console.error(error)
+        }
+      }
+    }
+
+    return {
+      showLoginDialog,
+      instanceUrl,
+      login,
+    }
+  },
+})
+</script>
+
 <template>
   <div class="login-container">
     <div class="p-card">
@@ -42,49 +85,6 @@
     </Dialog>
   </div>
 </template>
-
-<script lang="ts">
-import { defineComponent, ref } from 'vue'
-import Button from 'primevue/button'
-import Dialog from 'primevue/dialog'
-import InputText from 'primevue/inputtext'
-import { useAuthStore } from '@/stores/authStore'
-import authService from '@/services/authService'
-
-export default defineComponent({
-  name: 'Login',
-  components: {
-    Button,
-    Dialog,
-    InputText,
-  },
-  setup() {
-    const authStore = useAuthStore()
-    const showLoginDialog = ref(false)
-    const instanceUrl = ref('https://')
-
-    const login = async () => {
-      if (instanceUrl.value) {
-        try {
-          await authService.startOAuthFlow(
-            instanceUrl.value.trim().replace(/\/$/, ''),
-            authStore,
-          )
-          showLoginDialog.value = false
-        } catch (error) {
-          console.error(error)
-        }
-      }
-    }
-
-    return {
-      showLoginDialog,
-      instanceUrl,
-      login,
-    }
-  },
-})
-</script>
 
 <style scoped>
 .login-container {

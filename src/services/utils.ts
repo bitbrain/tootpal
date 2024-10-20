@@ -18,3 +18,25 @@ export async function generateCodeChallenge(
     .replace(/\//g, '_')
     .replace(/=+$/, '')
 }
+
+export function parseLinkHeader(header: string) {
+  const links: any = {}
+  const parts = header.split(',')
+
+  parts.forEach(part => {
+    const section = part.split(';')
+    if (section.length !== 2) {
+      return
+    }
+
+    const url = section[0].replace(/<(.*)>/, '$1').trim()
+    const name = section[1].replace(/rel="(.*)"/, '$1').trim()
+    links[name] = url
+  })
+
+  return links
+}
+
+export function removeProtocol(url: string): string {
+  return url.replace(/^https?:\/\//, '')
+}

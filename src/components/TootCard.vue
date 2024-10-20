@@ -1,41 +1,3 @@
-<template>
-  <Card>
-    <template #title>
-      <div class="profile-header">
-        <Avatar :image="account.avatar" shape="circle" />
-        <div class="profile-info">
-          <a :href="accountUrl" target="_blank" class="display-name">{{
-            account.display_name || account.username
-          }}</a>
-          <span class="acct">@{{ account.acct }}</span>
-        </div>
-      </div>
-    </template>
-
-    <template #footer>
-      <Toot :toot="toot" />
-      <div class="actions">
-        <Button
-          v-if="!following && !cannotFollow"
-          label="Follow"
-          icon="pi pi-plus"
-          @click="followUser"
-        />
-        <Button
-          v-else-if="following"
-          label="Following"
-          icon="pi pi-check"
-          class="p-button-success"
-          disabled
-        />
-        <span v-else-if="cannotFollow" class="cannot-follow-text"
-          >Cannot Follow</span
-        >
-      </div>
-    </template>
-  </Card>
-</template>
-
 <script lang="ts">
 import { defineComponent, ref, watch } from 'vue'
 import Card from 'primevue/card'
@@ -44,6 +6,7 @@ import Avatar from 'primevue/avatar'
 import Toot from './Toot.vue'
 import { useAuthStore } from '@/stores/authStore'
 import mastodonService from '@/services/mastodonService'
+import { useFollowStore } from '@/stores/followStore'
 
 export default defineComponent({
   name: 'TootCard',
@@ -65,6 +28,7 @@ export default defineComponent({
   },
   setup(props) {
     const authStore = useAuthStore()
+    const followStore = useFollowStore()
     const following = ref(false)
     const cannotFollow = ref(false)
 
@@ -72,11 +36,8 @@ export default defineComponent({
 
     const followUser = async () => {
       try {
-        await mastodonService.followUser(
-          props.account,
-          authStore.instanceUrl!,
-          authStore.accessToken!,
-        )
+        await mastodonService.followUser(props.account)
+        followStore.addFollower(props.account.id)
         following.value = true
       } catch (error) {
         console.error(error)
@@ -84,15 +45,7 @@ export default defineComponent({
     }
 
     const checkRelationship = async () => {
-      const relationship = await mastodonService.getRelationship(
-        props.account,
-        authStore.instanceUrl!,
-        authStore.accessToken!,
-      )
-      if (relationship) {
-        following.value = relationship.following
-        cannotFollow.value = !relationship.following && relationship.blocked
-      }
+      following.value = followStore.isFollowing(props.account.id)
     }
 
     watch(
@@ -105,7 +58,6 @@ export default defineComponent({
 
     return {
       following,
-      cannotFollow,
       followUser,
       accountUrl,
       toot: props.toot,
@@ -113,6 +65,41 @@ export default defineComponent({
   },
 })
 </script>
+
+<template>
+  <Card>
+    <template #title>
+      <div class="profile-header">
+        <Avatar :image="account.avatar" shape="circle" />
+        <div class="profile-info">
+          <a :href="accountUrl" target="_blank" class="display-name">{{
+            account.display_name || account.username
+          }}</a>
+          <span class="acct">@{{ account.acct }}</span>
+        </div>
+      </div>
+    </template>
+
+    <template #footer>
+      <Toot :toot="toot" />
+      <div class="actions">
+        <Button
+          v-if="!following"
+          label="Follow"
+          icon="pi pi-plus"
+          @click="followUser"
+        />
+        <Button
+          v-else-if="following"
+          label="Following"
+          icon="pi pi-check"
+          class="p-button-success"
+          disabled
+        />
+      </div>
+    </template>
+  </Card>
+</template>
 
 <style scoped>
 .profile-header {

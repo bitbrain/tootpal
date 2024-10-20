@@ -1,3 +1,65 @@
+<script lang="ts">
+import { defineComponent, ref, onMounted } from 'vue'
+import InputText from 'primevue/inputtext'
+import Button from 'primevue/button'
+import Chips from 'primevue/chips'
+import { useAuthStore } from '@/stores/authStore'
+import { useFollowStore } from '@/stores/followStore'
+import mastodonService from '@/services/mastodonService'
+import Results from './Results.vue'
+
+export default defineComponent({
+  name: 'Search',
+  components: {
+    InputText,
+    Button,
+    Chips,
+    Results,
+  },
+  setup() {
+    const authStore = useAuthStore()
+    const followStore = useFollowStore()
+    const searchServerUrl = ref('https://mastodon.social')
+    const hashtags = ref(['godot', 'godotengine'])
+    const results = ref<{ account: any; toot: any }[]>([])
+
+    const search = async () => {
+      try {
+        results.value = await mastodonService.searchToots(
+          searchServerUrl.value,
+          hashtags.value,
+        )
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    const logout = () => {
+      authStore.logout()
+      window.location.reload()
+    }
+
+    // ensure to load the people we are following already beforehand
+    onMounted(async () => {
+      try {
+        const followingUsers = await mastodonService.getFollowing()
+        followStore.setFollowers(followingUsers.map(user => user.id))
+      } catch (error) {
+        console.error(error)
+      }
+    })
+
+    return {
+      searchServerUrl,
+      hashtags,
+      results,
+      search,
+      logout,
+    }
+  },
+})
+</script>
+
 <template>
   <div class="search-container">
     <div class="header">
@@ -22,56 +84,6 @@
     <Results v-if="results.length > 0" :results="results" />
   </div>
 </template>
-
-<script lang="ts">
-import { defineComponent, ref } from 'vue'
-import InputText from 'primevue/inputtext'
-import Button from 'primevue/button'
-import Chips from 'primevue/chips'
-import { useAuthStore } from '@/stores/authStore'
-import mastodonService from '@/services/mastodonService'
-import Results from './Results.vue'
-
-export default defineComponent({
-  name: 'Search',
-  components: {
-    InputText,
-    Button,
-    Chips,
-    Results,
-  },
-  setup() {
-    const authStore = useAuthStore()
-    const searchServerUrl = ref('https://mastodon.social')
-    const hashtags = ref(['godot', 'godotengine'])
-    const results = ref<{ account: any; toot: any }[]>([])
-
-    const search = async () => {
-      try {
-        results.value = await mastodonService.searchToots(
-          searchServerUrl.value,
-          hashtags.value,
-        )
-      } catch (error) {
-        console.error(error)
-      }
-    }
-
-    const logout = () => {
-      authStore.logout()
-      window.location.reload()
-    }
-
-    return {
-      searchServerUrl,
-      hashtags,
-      results,
-      search,
-      logout,
-    }
-  },
-})
-</script>
 
 <style scoped>
 .search-container {
