@@ -19,13 +19,15 @@ export default defineComponent({
   },
   setup(props, { emit }) {
     const servers = ref<MastodonInstance[]>([])
-    const selectedServer = ref<string | null>(props.modelValue)
+    const selectedServer = ref<string | null>(
+      props.modelValue ? props.modelValue.replace(/^https?:\/\//, '') : '',
+    )
 
     const fetchServers = async () => {
       try {
         servers.value = await mastodonService.listServers()
         if (servers.value.length > 0 && !selectedServer.value) {
-          selectedServer.value = `https://${servers.value[0].domain}`
+          selectedServer.value = servers.value[0].domain
         }
       } catch (error) {
         console.error('Failed to fetch servers:', error)
@@ -36,23 +38,32 @@ export default defineComponent({
       fetchServers()
     })
 
-    // Watch for changes in selectedServer and emit
     watch(selectedServer, value => {
-      emit('update:modelValue', value)
+      const fullUrl = value
+        ? value.startsWith('http')
+          ? value
+          : `https://${value}`
+        : null
+      emit('update:modelValue', fullUrl)
     })
 
-    // Watch for changes in props.modelValue and update selectedServer
     watch(
       () => props.modelValue,
       newValue => {
         selectedServer.value = newValue
+          ? newValue.replace(/^https?:\/\//, '')
+          : ''
       },
     )
 
     const serverOptions = computed(() => {
       return servers.value.map(server => ({
-        label: `${server.domain} ${server.total_users ? `${formatNumber(server.total_users)} users)` : ''}`,
-        value: `https://${server.domain}`,
+        label: `${server.domain} ${
+          server.total_users
+            ? `(${formatNumber(server.total_users)} users)`
+            : ''
+        }`,
+        value: server.domain,
       }))
     })
 
@@ -72,8 +83,9 @@ export default defineComponent({
       :options="serverOptions"
       optionLabel="label"
       optionValue="value"
-      placeholder="Select a server"
+      placeholder="Select or enter a server"
       :filter="true"
+      :editable="true"
       :showClear="true"
     ></Select>
   </div>
