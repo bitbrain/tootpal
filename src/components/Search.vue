@@ -9,6 +9,7 @@ import mastodonService from '@/services/mastodonService'
 import Results from './Results.vue'
 import ProgressSpinner from 'primevue/progressspinner'
 import router from '@/router'
+import ServerSelect from './ServerSelect.vue'
 
 const limit = 90
 
@@ -20,11 +21,12 @@ export default defineComponent({
     Chips,
     Results,
     ProgressSpinner,
+    ServerSelect,
   },
   setup() {
     const authStore = useAuthStore()
     const followStore = useFollowStore()
-    const searchServerUrl = ref('https://mastodon.social')
+    const searchServerUrl = ref<string | null>(null) // Initialize as null
     const hashtags = ref(['godot', 'godotengine'])
     const results = ref<{ account: any; toot: any }[]>([])
     const loading = ref(false)
@@ -36,12 +38,14 @@ export default defineComponent({
         results.value = []
         const followingUsers = await mastodonService.getFollowing()
         followStore.setFollowers(followingUsers.map(user => user.id))
-        results.value = await mastodonService.searchUnfollowedToots(
-          searchServerUrl.value,
-          hashtags.value,
-          limit,
-          lastId.value,
-        )
+        if (searchServerUrl.value) {
+          results.value = await mastodonService.searchUnfollowedToots(
+            searchServerUrl.value,
+            hashtags.value,
+            limit,
+            lastId.value,
+          )
+        }
       } catch (error) {
         console.error(error)
       } finally {
@@ -53,14 +57,16 @@ export default defineComponent({
       loading.value = true
       try {
         lastId.value = results.value[results.value.length - 1].toot.id
-        results.value.push(
-          ...(await mastodonService.searchUnfollowedToots(
-            searchServerUrl.value,
-            hashtags.value,
-            limit,
-            lastId.value,
-          )),
-        )
+        if (searchServerUrl.value) {
+          results.value.push(
+            ...(await mastodonService.searchUnfollowedToots(
+              searchServerUrl.value,
+              hashtags.value,
+              limit,
+              lastId.value,
+            )),
+          )
+        }
       } catch (error) {
         console.error(error)
       } finally {
@@ -100,12 +106,14 @@ export default defineComponent({
     </div>
     <div class="search-form">
       <div class="grid-form">
-        <InputText
-          v-model="searchServerUrl"
-          placeholder="Mastodon Server URL to Search"
-        />
+        <ServerSelect v-model="searchServerUrl" />
         <Chips v-model="hashtags" placeholder="Enter hashtags" />
-        <Button label="Search" icon="pi pi-search" @click="search" />
+        <Button
+          :disabled="!searchServerUrl || !hashtags.length"
+          label="Search"
+          icon="pi pi-search"
+          @click="search"
+        />
       </div>
     </div>
     <div class="content">
