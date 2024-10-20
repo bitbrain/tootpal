@@ -44,14 +44,14 @@ export default defineComponent({
       }
     }
 
-    const checkRelationship = async () => {
+    const checkFollowing = async () => {
       following.value = followStore.isFollowing(props.account.id)
     }
 
     watch(
-      () => [authStore.instanceUrl, authStore.accessToken, props.account],
+      () => [props.account],
       () => {
-        checkRelationship()
+        checkFollowing()
       },
       { immediate: true },
     )
@@ -67,7 +67,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <Card>
+  <Card class="toot-card">
     <template #title>
       <div class="profile-header">
         <Avatar :image="account.avatar" shape="circle" />
@@ -102,6 +102,9 @@ export default defineComponent({
 </template>
 
 <style scoped>
+.toot-card {
+  margin: 2rem 0;
+}
 .profile-header {
   display: flex;
   align-items: center;

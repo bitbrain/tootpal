@@ -1,4 +1,5 @@
 import { useAuthStore } from '@/stores/authStore'
+import { useFollowStore } from '@/stores/followStore'
 import { parseLinkHeader, removeProtocol } from './utils'
 
 const mastodonService = {
@@ -40,11 +41,16 @@ const mastodonService = {
     return followingAccounts
   },
 
-  async searchToots(serverUrl: string, hashtags: string[]) {
+  async searchUnfollowedToots(
+    serverUrl: string,
+    hashtags: string[],
+    limit: number,
+  ) {
     const accountsMap = new Map<string, { account: any; toot: any }>()
+    const followStore = useFollowStore()
 
     for (const tag of hashtags) {
-      const url = `${serverUrl}/api/v1/timelines/tag/${encodeURIComponent(tag)}?limit=40`
+      const url = `${serverUrl}/api/v1/timelines/tag/${encodeURIComponent(tag)}?limit=${limit}`
       const response = await fetch(url)
 
       if (!response.ok) {
@@ -59,6 +65,12 @@ const mastodonService = {
         const globalAcc = `${status.account.acct}@${removeProtocol(serverUrl)}`
         const resolvedAccount =
           resolvedAccounts[globalAcc] || (await this.resolveAccount(globalAcc))
+
+        if (followStore.isFollowing(resolvedAccount.id)) {
+          // skip anything that is already followed - not worth showing
+          continue
+        }
+
         resolvedAccounts[globalAcc] = resolvedAccount
         const account = resolvedAccount
         const acctKey = resolvedAccount.acct

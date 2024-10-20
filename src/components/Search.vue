@@ -8,6 +8,8 @@ import { useFollowStore } from '@/stores/followStore'
 import mastodonService from '@/services/mastodonService'
 import Results from './Results.vue'
 
+const limit = 20
+
 export default defineComponent({
   name: 'Search',
   components: {
@@ -25,9 +27,10 @@ export default defineComponent({
 
     const search = async () => {
       try {
-        results.value = await mastodonService.searchToots(
+        results.value = await mastodonService.searchUnfollowedToots(
           searchServerUrl.value,
           hashtags.value,
+          limit,
         )
       } catch (error) {
         console.error(error)
