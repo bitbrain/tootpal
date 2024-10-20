@@ -5,18 +5,19 @@ import Dialog from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
 import { useAuthStore } from '@/stores/authStore'
 import authService from '@/services/authService'
+import ServerSelect from './ServerSelect.vue'
 
 export default defineComponent({
   name: 'Login',
   components: {
     Button,
     Dialog,
-    InputText,
+    ServerSelect,
   },
   setup() {
     const authStore = useAuthStore()
     const showLoginDialog = ref(false)
-    const instanceUrl = ref('https://')
+    const instanceUrl = ref('')
 
     const login = async () => {
       if (instanceUrl.value) {
@@ -65,12 +66,8 @@ export default defineComponent({
     >
       <div class="p-fluid">
         <div class="p-field">
-          <label for="instanceUrl">Mastodon Instance URL</label>
-          <InputText
-            id="instanceUrl"
-            v-model="instanceUrl"
-            placeholder="https://mastodon.social"
-          />
+          <label for="instanceUrl">Mastodon Instance</label>
+          <ServerSelect v-model="instanceUrl" />
         </div>
         <div class="dialog-footer">
           <Button
@@ -79,7 +76,12 @@ export default defineComponent({
             @click="showLoginDialog = false"
             class="p-button-text"
           />
-          <Button label="Login" icon="pi pi-check" @click="login" />
+          <Button
+            :disabled="!instanceUrl"
+            label="Login"
+            icon="pi pi-check"
+            @click="login"
+          />
         </div>
       </div>
     </Dialog>

@@ -2,6 +2,10 @@ import { useAuthStore } from '@/stores/authStore'
 import { useFollowStore } from '@/stores/followStore'
 import { parseLinkHeader, removeProtocol } from './utils'
 
+export interface MastodonInstance {
+  domain: string
+}
+
 const mastodonService = {
   async getFollowing() {
     const authStore = useAuthStore()
@@ -68,30 +72,35 @@ const mastodonService = {
       const resolvedAccounts: Record<string, any> = {}
 
       for (const status of statuses) {
-        const globalAcc = `${status.account.acct}@${removeProtocol(serverUrl)}`
-        const resolvedAccount =
-          resolvedAccounts[globalAcc] || (await this.resolveAccount(globalAcc))
+        try {
+          const globalAcc = `${status.account.acct}@${removeProtocol(serverUrl)}`
+          const resolvedAccount =
+            resolvedAccounts[globalAcc] ||
+            (await this.resolveAccount(globalAcc))
 
-        if (followStore.isFollowing(resolvedAccount.id)) {
-          // skip anything that is already followed - not worth showing
-          continue
-        }
+          if (followStore.isFollowing(resolvedAccount.id)) {
+            // skip anything that is already followed - not worth showing
+            continue
+          }
 
-        resolvedAccounts[globalAcc] = resolvedAccount
-        const account = resolvedAccount
-        const acctKey = resolvedAccount.acct
+          resolvedAccounts[globalAcc] = resolvedAccount
+          const account = resolvedAccount
+          const acctKey = resolvedAccount.acct
 
-        if (accountsMap.has(acctKey)) {
-          const existingEntry = accountsMap.get(acctKey)!
-          // Update to the most recent toot
-          if (
-            new Date(status.created_at) >
-            new Date(existingEntry.toot.created_at)
-          ) {
+          if (accountsMap.has(acctKey)) {
+            const existingEntry = accountsMap.get(acctKey)!
+            // Update to the most recent toot
+            if (
+              new Date(status.created_at) >
+              new Date(existingEntry.toot.created_at)
+            ) {
+              accountsMap.set(acctKey, { account, toot: status })
+            }
+          } else {
             accountsMap.set(acctKey, { account, toot: status })
           }
-        } else {
-          accountsMap.set(acctKey, { account, toot: status })
+        } catch (error) {
+          console.error(error)
         }
       }
     }
@@ -133,10 +142,18 @@ const mastodonService = {
     })
 
     if (!lookedUpResponse.ok) {
-      throw new Error(`Error following user: ${lookedUpResponse.statusText}`)
+      throw new Error(
+        `Unable to resolve account: ${lookedUpResponse.statusText}`,
+      )
     }
 
     return lookedUpResponse.json()
+  },
+
+  async listServers(): Promise<MastodonInstance[]> {
+    const response = await fetch('https://api.joinmastodon.org/servers')
+    const data = await response.json()
+    return data as MastodonInstance[]
   },
 }
 
