@@ -1,6 +1,8 @@
 import { generateCodeChallenge, generateRandomString } from './utils'
 import { useAuthStore } from '@/stores/authStore'
 
+const scopes = 'read:follows write:follows'
+
 const authService = {
   async startOAuthFlow(instanceUrl: string, authStore: any) {
     try {
@@ -23,7 +25,7 @@ const authService = {
         response_type: 'code',
         client_id: appData.client_id,
         redirect_uri: redirectUri,
-        scope: 'read write follow',
+        scope: scopes,
         code_challenge: codeChallenge,
         code_challenge_method: 'S256',
       })
@@ -84,9 +86,9 @@ const authService = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        client_name: 'TootPal',
+        client_name: 'tootpal',
         redirect_uris: redirectUri,
-        scopes: 'read write follow',
+        scopes: scopes,
         website: '',
       }),
     })
