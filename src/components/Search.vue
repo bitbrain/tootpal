@@ -10,7 +10,7 @@ import Results from './Results.vue'
 import ProgressSpinner from 'primevue/progressspinner'
 import router from '@/router'
 
-const limit = 20
+const limit = 90
 
 export default defineComponent({
   name: 'Search',
@@ -28,6 +28,7 @@ export default defineComponent({
     const hashtags = ref(['godot', 'godotengine'])
     const results = ref<{ account: any; toot: any }[]>([])
     const loading = ref(false)
+    const lastId = ref(null)
 
     const search = async () => {
       try {
@@ -39,6 +40,26 @@ export default defineComponent({
           searchServerUrl.value,
           hashtags.value,
           limit,
+          lastId.value,
+        )
+      } catch (error) {
+        console.error(error)
+      } finally {
+        loading.value = false
+      }
+    }
+
+    const expandSearch = async () => {
+      loading.value = true
+      try {
+        lastId.value = results.value[results.value.length - 1].toot.id
+        results.value.push(
+          ...(await mastodonService.searchUnfollowedToots(
+            searchServerUrl.value,
+            hashtags.value,
+            limit,
+            lastId.value,
+          )),
         )
       } catch (error) {
         console.error(error)
@@ -58,6 +79,7 @@ export default defineComponent({
       hashtags,
       results,
       search,
+      expandSearch,
       logout,
       loading,
     }
@@ -88,6 +110,9 @@ export default defineComponent({
     </div>
     <div class="content">
       <Results v-if="results.length > 0" :results="results" />
+      <Button v-if="results.length > 0 && !loading" @click="expandSearch"
+        >Expand Search!</Button
+      >
       <ProgressSpinner v-else-if="loading" aria-label="Loading" />
       <h3 v-else class="info">Search for hashtags to get started!</h3>
     </div>
@@ -98,7 +123,8 @@ export default defineComponent({
 .content {
   margin-top: 3rem;
   display: flex;
-  justify-content: center;
+  align-items: center;
+  flex-direction: column;
 }
 .info {
   text-align: center;

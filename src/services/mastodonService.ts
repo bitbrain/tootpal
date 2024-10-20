@@ -45,12 +45,18 @@ const mastodonService = {
     serverUrl: string,
     hashtags: string[],
     limit: number,
+    maxId: string | null = null, // Optional param for pagination control
   ) {
     const accountsMap = new Map<string, { account: any; toot: any }>()
     const followStore = useFollowStore()
 
     for (const tag of hashtags) {
-      const url = `${serverUrl}/api/v1/timelines/tag/${encodeURIComponent(tag)}?limit=${limit}`
+      let url = `${serverUrl}/api/v1/timelines/tag/${encodeURIComponent(tag)}?limit=${limit}`
+
+      if (maxId) {
+        url += `&max_id=${maxId}`
+      }
+
       const response = await fetch(url)
 
       if (!response.ok) {
@@ -90,7 +96,13 @@ const mastodonService = {
       }
     }
 
-    return Array.from(accountsMap.values())
+    const sortedResults = Array.from(accountsMap.values()).sort(
+      (a, b) =>
+        new Date(b.toot.created_at).getTime() -
+        new Date(a.toot.created_at).getTime(),
+    )
+
+    return sortedResults
   },
 
   async followUser(account: any) {
