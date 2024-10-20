@@ -7,6 +7,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { useFollowStore } from '@/stores/followStore'
 import mastodonService from '@/services/mastodonService'
 import Results from './Results.vue'
+import ProgressSpinner from 'primevue/progressspinner'
 
 const limit = 20
 
@@ -17,6 +18,7 @@ export default defineComponent({
     Button,
     Chips,
     Results,
+    ProgressSpinner,
   },
   setup() {
     const authStore = useAuthStore()
@@ -24,9 +26,11 @@ export default defineComponent({
     const searchServerUrl = ref('https://mastodon.social')
     const hashtags = ref(['godot', 'godotengine'])
     const results = ref<{ account: any; toot: any }[]>([])
+    const loading = ref(false)
 
     const search = async () => {
       try {
+        loading.value = true
         results.value = await mastodonService.searchUnfollowedToots(
           searchServerUrl.value,
           hashtags.value,
@@ -34,6 +38,8 @@ export default defineComponent({
         )
       } catch (error) {
         console.error(error)
+      } finally {
+        loading.value = false
       }
     }
 
@@ -58,6 +64,7 @@ export default defineComponent({
       results,
       search,
       logout,
+      loading,
     }
   },
 })
@@ -66,7 +73,7 @@ export default defineComponent({
 <template>
   <div class="search-container">
     <div class="header">
-      <h2>TootPal</h2>
+      <h2>tootpal</h2>
       <Button
         label="Logout"
         icon="pi pi-sign-out"
@@ -84,11 +91,23 @@ export default defineComponent({
         <Button label="Search" icon="pi pi-search" @click="search" />
       </div>
     </div>
-    <Results v-if="results.length > 0" :results="results" />
+    <div class="content">
+      <Results v-if="results.length > 0" :results="results" />
+      <ProgressSpinner v-else-if="loading" aria-label="Loading" />
+      <h3 v-else class="info">Search for hashtags to get started!</h3>
+    </div>
   </div>
 </template>
 
 <style scoped>
+.content {
+  margin-top: 3rem;
+  display: flex;
+  justify-content: center;
+}
+.info {
+  text-align: center;
+}
 .search-container {
   padding: 1rem;
 }

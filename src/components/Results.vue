@@ -11,7 +11,7 @@ export default defineComponent({
   },
   props: {
     results: {
-      type: Array as () => { account: any; toot: any; accountId: string }[],
+      type: Array as () => { account: any; toot: any }[],
       required: true,
     },
   },
