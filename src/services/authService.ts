@@ -13,10 +13,13 @@ const authService = {
       authStore.setInstanceUrl(instanceUrl)
 
       let appData = authStore.appData
+      const storedScopes = localStorage.getItem('appScopes')
 
-      if (!appData) {
+      // Check if the scope has changed -> need to register them!
+      if (!appData || storedScopes !== scopes) {
         appData = await this.registerApp(instanceUrl)
         authStore.setAppData(appData)
+        localStorage.setItem('appScopes', scopes)
       }
 
       const redirectUri = window.location.origin + window.location.pathname
@@ -112,10 +115,7 @@ const authService = {
     if (!response.ok) {
       throw new Error('Failed to fetch current user.')
     }
-    const json = await response.json()
-
-    console.log(JSON.stringify(json, null, 2))
-    return json
+    return response.json()
   },
 }
 

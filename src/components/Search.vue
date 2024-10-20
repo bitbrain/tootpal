@@ -8,6 +8,7 @@ import { useFollowStore } from '@/stores/followStore'
 import mastodonService from '@/services/mastodonService'
 import Results from './Results.vue'
 import ProgressSpinner from 'primevue/progressspinner'
+import router from '@/router'
 
 const limit = 20
 
@@ -31,6 +32,9 @@ export default defineComponent({
     const search = async () => {
       try {
         loading.value = true
+        results.value = []
+        const followingUsers = await mastodonService.getFollowing()
+        followStore.setFollowers(followingUsers.map(user => user.id))
         results.value = await mastodonService.searchUnfollowedToots(
           searchServerUrl.value,
           hashtags.value,
@@ -45,18 +49,9 @@ export default defineComponent({
 
     const logout = () => {
       authStore.logout()
+      router.push('/')
       window.location.reload()
     }
-
-    // ensure to load the people we are following already beforehand
-    onMounted(async () => {
-      try {
-        const followingUsers = await mastodonService.getFollowing()
-        followStore.setFollowers(followingUsers.map(user => user.id))
-      } catch (error) {
-        console.error(error)
-      }
-    })
 
     return {
       searchServerUrl,

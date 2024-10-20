@@ -1,8 +1,9 @@
 \
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, computed } from 'vue'
 import Button from 'primevue/button'
 import Login from '@/components/Login.vue'
+import Search from '@/components/Search.vue'
 import { useAuthStore } from '@/stores/authStore'
 
 export default defineComponent({
@@ -10,12 +11,13 @@ export default defineComponent({
   components: {
     Login,
     Button,
+    Search,
   },
   setup() {
     const authStore = useAuthStore()
-
+    const isAuthenticated = computed(() => authStore.isAuthenticated)
     return {
-      isAuthenticated: authStore.isAuthenticated,
+      isAuthenticated,
     }
   },
 })
@@ -24,11 +26,7 @@ export default defineComponent({
 <template>
   <div>
     <Login v-if="!isAuthenticated" />
-    <div v-else>
-      <router-link to="/search">
-        <Button label="Go to Search" icon="pi pi-search" />
-      </router-link>
-    </div>
+    <Search v-else />
   </div>
 </template>
 
