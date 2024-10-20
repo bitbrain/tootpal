@@ -4,6 +4,7 @@ import { parseLinkHeader, removeProtocol } from './utils'
 
 export interface MastodonInstance {
   domain: string
+  total_users: number
 }
 
 const mastodonService = {
@@ -153,7 +154,10 @@ const mastodonService = {
   async listServers(): Promise<MastodonInstance[]> {
     const response = await fetch('https://api.joinmastodon.org/servers')
     const data = await response.json()
-    return data as MastodonInstance[]
+    const instances = data as MastodonInstance[]
+    return instances
+      .filter(instance => instance.total_users > 0)
+      .sort((i1, i2) => i2.total_users - i1.total_users)
   },
 }
 

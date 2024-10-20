@@ -40,3 +40,18 @@ export function parseLinkHeader(header: string) {
 export function removeProtocol(url: string): string {
   return url.replace(/^https?:\/\//, '')
 }
+
+export function formatNumber(n: number) {
+  if (n < 999) {
+    return n
+  }
+  const units = ['k', 'm', 'b', 't']
+  const exponent = Math.floor(Math.log10(n) / 3)
+
+  if (exponent === 0) return n.toString()
+
+  const unit = units[exponent - 1]
+  const scaledNumber = n / Math.pow(1000, exponent)
+
+  return scaledNumber.toFixed(1).replace(/\.0$/, '') + unit
+}

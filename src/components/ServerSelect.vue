@@ -4,6 +4,7 @@ import mastodonService, {
   type MastodonInstance,
 } from '@/services/mastodonService'
 import Select from 'primevue/select'
+import { formatNumber } from '@/services/utils'
 
 export default defineComponent({
   name: 'ServerSelect',
@@ -50,7 +51,7 @@ export default defineComponent({
 
     const serverOptions = computed(() => {
       return servers.value.map(server => ({
-        label: server.domain,
+        label: `${server.domain} (${formatNumber(server.total_users)} users)`,
         value: `https://${server.domain}`,
       }))
     })
