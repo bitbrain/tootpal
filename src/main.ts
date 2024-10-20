@@ -56,10 +56,7 @@ export const createApp = ViteSSG(
 
           try {
             await authService.completeOAuthFlow(code)
-            const authStore = useAuthStore()
-            if (authStore.isAuthenticated) {
-              router.push('/search')
-            }
+            router.replace('/')
           } catch (error) {
             console.error(error)
           }

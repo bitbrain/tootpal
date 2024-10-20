@@ -1,7 +1,7 @@
 import { generateCodeChallenge, generateRandomString } from './utils'
 import { useAuthStore } from '@/stores/authStore'
 
-const scopes = 'read:follows write:follows'
+const scopes = 'read:follows write:follows read:accounts'
 
 const authService = {
   async startOAuthFlow(instanceUrl: string, authStore: any) {
@@ -13,10 +13,13 @@ const authService = {
       authStore.setInstanceUrl(instanceUrl)
 
       let appData = authStore.appData
+      const storedScopes = localStorage.getItem('appScopes')
 
-      if (!appData) {
+      // Check if the scope has changed -> need to register them!
+      if (!appData || storedScopes !== scopes) {
         appData = await this.registerApp(instanceUrl)
         authStore.setAppData(appData)
+        localStorage.setItem('appScopes', scopes)
       }
 
       const redirectUri = window.location.origin + window.location.pathname
@@ -112,7 +115,7 @@ const authService = {
     if (!response.ok) {
       throw new Error('Failed to fetch current user.')
     }
-    return await response.json()
+    return response.json()
   },
 }
 

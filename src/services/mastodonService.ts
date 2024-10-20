@@ -1,9 +1,56 @@
+import { useAuthStore } from '@/stores/authStore'
+import { useFollowStore } from '@/stores/followStore'
+import { parseLinkHeader, removeProtocol } from './utils'
+
 const mastodonService = {
-  async searchToots(serverUrl: string, hashtags: string[]) {
+  async getFollowing() {
+    const authStore = useAuthStore()
+    const accountId = authStore.currentUser?.id
+
+    // Fetch all following accounts with pagination
+    const followingAccounts = []
+    let url: string | null =
+      `${authStore.instanceUrl}/api/v1/accounts/${accountId}/following?limit=80`
+
+    while (url) {
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${authStore.accessToken}`,
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error(
+          `Error fetching following accounts: ${response.statusText}`,
+        )
+      }
+
+      const accounts = await response.json()
+      followingAccounts.push(...accounts)
+
+      // Handle pagination
+      const linkHeader = response.headers.get('link')
+      if (linkHeader) {
+        const parsedLinks = parseLinkHeader(linkHeader)
+        url = parsedLinks.next
+      } else {
+        url = null
+      }
+    }
+
+    return followingAccounts
+  },
+
+  async searchUnfollowedToots(
+    serverUrl: string,
+    hashtags: string[],
+    limit: number,
+  ) {
     const accountsMap = new Map<string, { account: any; toot: any }>()
+    const followStore = useFollowStore()
 
     for (const tag of hashtags) {
-      const url = `${serverUrl}/api/v1/timelines/tag/${encodeURIComponent(tag)}?limit=40`
+      const url = `${serverUrl}/api/v1/timelines/tag/${encodeURIComponent(tag)}?limit=${limit}`
       const response = await fetch(url)
 
       if (!response.ok) {
@@ -12,9 +59,21 @@ const mastodonService = {
 
       const statuses = await response.json()
 
-      statuses.forEach((status: any) => {
-        const account = status.account
-        const acctKey = account.acct
+      const resolvedAccounts: Record<string, any> = {}
+
+      for (const status of statuses) {
+        const globalAcc = `${status.account.acct}@${removeProtocol(serverUrl)}`
+        const resolvedAccount =
+          resolvedAccounts[globalAcc] || (await this.resolveAccount(globalAcc))
+
+        if (followStore.isFollowing(resolvedAccount.id)) {
+          // skip anything that is already followed - not worth showing
+          continue
+        }
+
+        resolvedAccounts[globalAcc] = resolvedAccount
+        const account = resolvedAccount
+        const acctKey = resolvedAccount.acct
 
         if (accountsMap.has(acctKey)) {
           const existingEntry = accountsMap.get(acctKey)!
@@ -28,137 +87,44 @@ const mastodonService = {
         } else {
           accountsMap.set(acctKey, { account, toot: status })
         }
-      })
+      }
     }
 
-    // Return an array of objects containing account and toot
     return Array.from(accountsMap.values())
   },
 
-  async getRelationships(
-    accounts: any[],
-    instanceUrl: string,
-    accessToken: string,
-  ) {
-    const idMap = new Map()
-    const relationshipsMap = new Map()
+  async followUser(account: any) {
+    const authStore = useAuthStore()
 
-    for (const account of accounts) {
-      const lookupUrl = `${instanceUrl}/api/v1/accounts/lookup?acct=${encodeURIComponent(account.acct)}&resolve=true`
-
-      const lookupResponse = await fetch(lookupUrl, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      })
-
-      if (lookupResponse.ok) {
-        const accountData = await lookupResponse.json()
-        idMap.set(account.acct, accountData.id)
-      } else {
-        relationshipsMap.set(account.acct, null)
-        continue
-      }
-    }
-
-    const ids = Array.from(idMap.values())
-
-    if (ids.length === 0) {
-      return relationshipsMap
-    }
-
-    const params = new URLSearchParams()
-    ids.forEach(id => params.append('id[]', id))
-
-    const relationshipsUrl = `${instanceUrl}/api/v1/accounts/relationships?${params.toString()}`
-
-    const response = await fetch(relationshipsUrl, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    })
-
-    if (!response.ok) {
-      throw new Error(`Error fetching relationships: ${response.statusText}`)
-    }
-
-    const relationshipsData = await response.json()
-
-    relationshipsData.forEach((relationship: any) => {
-      const acct = Array.from(idMap.keys()).find(
-        key => idMap.get(key) === relationship.id,
-      )
-      if (acct) {
-        relationshipsMap.set(acct, relationship)
-      }
-    })
-
-    return relationshipsMap
-  },
-
-  async getRelationship(
-    account: any,
-    instanceUrl: string,
-    accessToken: string,
-  ) {
-    const lookupUrl = `${instanceUrl}/api/v1/accounts/lookup?acct=${encodeURIComponent(account.acct)}&resolve=true`
-
-    const lookupResponse = await fetch(lookupUrl, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    })
-
-    if (!lookupResponse.ok) {
-      return null
-    }
-
-    const accountData = await lookupResponse.json()
-
-    const relationshipsUrl = `${instanceUrl}/api/v1/accounts/relationships?id[]=${accountData.id}`
-
-    const response = await fetch(relationshipsUrl, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    })
-
-    if (!response.ok) {
-      return null
-    }
-
-    const relationshipsData = await response.json()
-    return relationshipsData[0]
-  },
-
-  async followUser(account: any, instanceUrl: string, accessToken: string) {
-    const lookupUrl = `${instanceUrl}/api/v1/accounts/lookup?acct=${encodeURIComponent(account.acct)}&resolve=true`
-
-    const lookupResponse = await fetch(lookupUrl, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    })
-
-    if (!lookupResponse.ok) {
-      throw new Error(`Could not lookup account ${account.acct}`)
-    }
-
-    const accountData = await lookupResponse.json()
-    const accountId = accountData.id
-
-    const url = `${instanceUrl}/api/v1/accounts/${accountId}/follow`
+    const url = `${authStore.instanceUrl}/api/v1/accounts/${account.id}/follow`
 
     const response = await fetch(url, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${authStore.accessToken}`,
       },
     })
 
     if (!response.ok) {
       throw new Error(`Error following user: ${response.statusText}`)
     }
+  },
+
+  async resolveAccount(unresolvedAccountId: string) {
+    const authStore = useAuthStore()
+    // account may not belong to the server yet.
+    // we have to explicitly resolve it at our instance first!
+    const lookupUrl = `${authStore.instanceUrl}/api/v1/accounts/lookup?acct=${unresolvedAccountId}`
+
+    const lookedUpResponse = await fetch(lookupUrl, {
+      method: 'GET',
+    })
+
+    if (!lookedUpResponse.ok) {
+      throw new Error(`Error following user: ${lookedUpResponse.statusText}`)
+    }
+
+    return lookedUpResponse.json()
   },
 }
 

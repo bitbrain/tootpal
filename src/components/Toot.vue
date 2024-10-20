@@ -1,17 +1,3 @@
-<template>
-  <div class="toot" v-if="toot && toot.account">
-    <div v-html="toot.content" class="toot-text"></div>
-    <div v-if="toot.media_attachments.length > 0" class="media-attachments">
-      <img
-        v-for="media in toot.media_attachments"
-        :key="media.id"
-        :src="media.preview_url"
-        :alt="media.description || 'Attachment'"
-      />
-    </div>
-  </div>
-</template>
-
 <script lang="ts">
 import { defineComponent } from 'vue'
 import Avatar from 'primevue/avatar'
@@ -45,6 +31,20 @@ export default defineComponent({
   },
 })
 </script>
+
+<template>
+  <div class="toot" v-if="toot && toot.account">
+    <div v-html="toot.content" class="toot-text"></div>
+    <div v-if="toot.media_attachments.length > 0" class="media-attachments">
+      <img
+        v-for="media in toot.media_attachments"
+        :key="media.id"
+        :src="media.preview_url"
+        :alt="media.description || 'Attachment'"
+      />
+    </div>
+  </div>
+</template>
 
 <style scoped>
 .toot {
