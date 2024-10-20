@@ -12,7 +12,7 @@ export default defineComponent({
   },
   props: {
     modelValue: {
-      type: String,
+      type: [String, null],
       required: true,
     },
   },
