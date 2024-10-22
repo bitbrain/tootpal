@@ -3,3 +3,28 @@ body {
   color: #ffffff;
   font-family: 'Open Sans', sans-serif;
 }
+
+main {
+  display: flex;
+  justify-content: center;
+}
+
+footer {
+  margin-top: 3rem;
+  color: var(--p-passive);
+  font-size: 0.75rem;
+}
+
+.p-dialog {
+  width: 25rem;
+}
+
+.p-select {
+  width: 100%;
+}
+
+label {
+  font-size: 0.75rem;
+  color: var(--p-passive);
+  margin-bottom: 0.5rem;
+}

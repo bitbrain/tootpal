@@ -46,20 +46,27 @@ export default defineComponent({
   <div class="login-container">
     <div class="p-card">
       <div class="p-card-body">
-        <h2>Welcome to TootPal</h2>
-        <p>Discover your pals across the fediverse!</p>
+        <img src="/src/assets/images/mastodon-logo.svg" />
+        <h2>tootpal</h2>
+        <p>Discover your pals across the fediverse.</p>
         <Button
-          label="Log in with Mastodon"
+          label="Login with Mastodon"
           icon="pi pi-mastodon"
           @click="showLoginDialog = true"
         />
+        <footer>
+          <p>
+            &copy; 2024 bitbrain. Licensed under the
+            <a href="https://opensource.org/licenses/MIT">MIT License</a>.
+          </p>
+        </footer>
       </div>
     </div>
 
     <!-- Login Dialog -->
     <Dialog
       class="p-dialog"
-      header="Log in with Mastodon"
+      header="Login with Mastodon"
       :visible.sync="showLoginDialog"
       @update:visible="showLoginDialog = false"
       modal

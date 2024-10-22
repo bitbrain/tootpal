@@ -24,10 +24,10 @@ export default defineComponent({
 </script>
 
 <template>
-  <div>
+  <main>
     <Login v-if="!isAuthenticated" />
     <Search v-else />
-  </div>
+  </main>
 </template>
 
 <style scoped>

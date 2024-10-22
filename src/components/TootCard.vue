@@ -27,10 +27,9 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const authStore = useAuthStore()
+    console.log(props.account)
     const followStore = useFollowStore()
     const following = ref(false)
-    const cannotFollow = ref(false)
 
     const accountUrl = props.account.url
 
@@ -67,21 +66,18 @@ export default defineComponent({
 </script>
 
 <template>
-  <Card class="toot-card">
-    <template #title>
-      <div class="profile-header">
-        <Avatar :image="account.avatar" shape="circle" />
-        <div class="profile-info">
-          <a :href="accountUrl" target="_blank" class="display-name">{{
-            account.display_name || account.username
-          }}</a>
-          <span class="acct">@{{ account.acct }}</span>
-        </div>
+  <div class="toot-card">
+    <div class="header">
+      <div class="profile">
+        <Avatar :image="account.avatar" /><a
+          :href="accountUrl"
+          target="_blank"
+          class="display-name"
+          >{{ account.display_name || account.username
+          }}{{ `@${account.acct}` }}</a
+        >
       </div>
-    </template>
 
-    <template #footer>
-      <Toot :toot="toot" />
       <div class="actions">
         <Button
           v-if="!following"
@@ -97,37 +93,39 @@ export default defineComponent({
           disabled
         />
       </div>
-    </template>
-  </Card>
+    </div>
+
+    <div class="bio" v-html="account.note"></div>
+
+    <Toot :toot="toot" />
+  </div>
 </template>
 
 <style scoped>
+::v-deep p {
+  margin: 0;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
 .toot-card {
-  margin: 2rem 0;
+  padding: 1.3rem;
+  background: rgb(from var(--p-zinc-950) r g b / 0.25);
+  border-radius: 10px;
+  margin-bottom: 1rem;
 }
-.profile-header {
+.profile {
   display: flex;
   align-items: center;
+  font-size: 1.5rem;
+  gap: 0.5rem;
 }
-.profile-info {
-  margin-left: 0.5rem;
-}
-.display-name {
-  font-weight: bold;
-  color: var(--md-indigo-primary-color);
-  text-decoration: none;
-}
-.acct {
-  color: #aaa;
-  margin-left: 0.5rem;
-}
-.actions {
-  margin-top: 1rem;
-  display: flex;
-  align-items: center;
-}
-.cannot-follow-text {
-  color: red;
-  font-weight: bold;
+.bio {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
 }
 </style>

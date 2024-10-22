@@ -47,45 +47,15 @@ export default defineComponent({
 </template>
 
 <style scoped>
-.toot {
-  margin-top: 1rem;
-  border-top: 1px solid #ccc;
-  padding-top: 1rem;
-}
-
-.toot-header {
-  display: flex;
-  align-items: center;
-}
-
-.toot-author-info {
-  margin-left: 0.5rem;
-}
-
-.toot-author {
-  font-weight: bold;
-  color: var(--md-indigo-primary-color);
-  text-decoration: none;
-}
-
-.toot-date {
-  color: #aaa;
-  margin-left: 0.5rem;
-}
-
 .toot-text {
+  font-size: 0.8rem;
   margin-top: 0.5rem;
+  color: rgb(from white r g b / 0.65);
 }
 
 .media-attachments img {
   max-width: 100%;
   border-radius: 0.5rem;
   margin-top: 0.5rem;
-}
-
-.toot-actions {
-  margin-top: 0.5rem;
-  display: flex;
-  gap: 0.5rem;
 }
 </style>

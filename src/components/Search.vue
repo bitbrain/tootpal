@@ -27,7 +27,7 @@ export default defineComponent({
     const authStore = useAuthStore()
     const followStore = useFollowStore()
     const searchServerUrl = ref<string | null>(null) // Initialize as null
-    const hashtags = ref(['godot', 'godotengine'])
+    const hashtags = ref(['godot'])
     const results = ref<{ account: any; toot: any }[]>([])
     const loading = ref(false)
     const lastId = ref(null)
@@ -96,7 +96,7 @@ export default defineComponent({
 <template>
   <div class="search-container">
     <div class="header">
-      <h2>tootpal</h2>
+      <h2 class="logo"><img src="@/assets/images/mastodon-logo.svg" height="20"></img>tootpal</h2>
       <Button
         label="Logout"
         icon="pi pi-sign-out"
@@ -128,6 +128,19 @@ export default defineComponent({
 </template>
 
 <style scoped>
+.search-container {
+  max-width: 1024px;
+}
+.search-form {
+  padding: .3rem;
+  background: rgb(from var(--p-zinc-950) r g b / 0.25);
+  border-radius: 10px;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 .content {
   margin-top: 3rem;
   display: flex;

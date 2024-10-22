@@ -1,4 +1,7 @@
-:root {
-  --md-indigo-primary-color: #5b49de;
-  --md-indigo-primary-color-text: #ffffff;
+@layer {
+  :root {
+    --md-indigo-primary-color-text: #ffffff;
+    --p-primary-color: #5b49de;
+    --p-passive: #414661;
+  }
 }
