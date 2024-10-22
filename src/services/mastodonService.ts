@@ -84,6 +84,11 @@ const mastodonService = {
             continue
           }
 
+          if (!resolvedAccount.discoverable) {
+            // hide accounts that don't want to be discovered.
+            continue
+          }
+
           resolvedAccounts[globalAcc] = resolvedAccount
           const account = resolvedAccount
           const acctKey = resolvedAccount.acct

@@ -27,7 +27,6 @@ export default defineComponent({
     },
   },
   setup(props) {
-    console.log(props.account)
     const followStore = useFollowStore()
     const following = ref(false)
 
