@@ -1,7 +1,10 @@
 body {
-  background-color: #191b22;
-  color: #ffffff;
-  font-family: 'Open Sans', sans-serif;
+  background-color: var(--tp-bg);
+  color: var(--tp-text);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell,
+    Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  font-size: 15px;
+  line-height: 1.5;
 }
 
 main {
@@ -11,8 +14,8 @@ main {
 
 footer {
   margin-top: 3rem;
-  color: var(--p-passive);
-  font-size: 0.75rem;
+  color: var(--tp-text-muted);
+  font-size: 0.85rem;
 }
 
 .p-dialog {
@@ -24,7 +27,28 @@ footer {
 }
 
 label {
-  font-size: 0.75rem;
-  color: var(--p-passive);
+  font-size: 0.85rem;
+  color: var(--tp-text-muted);
   margin-bottom: 0.5rem;
+}
+
+/* Links like OG Mastodon */
+a {
+  color: var(--tp-link);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+/* Card-like surfaces */
+.card, .toot-card {
+  background: var(--tp-card);
+  border: 1px solid var(--tp-border);
+}
+
+/* Subtle separators */
+hr {
+  border: 0;
+  border-top: 1px solid var(--tp-border);
 }

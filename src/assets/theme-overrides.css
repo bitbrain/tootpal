@@ -1,7 +1,16 @@
 @layer {
   :root {
-    --md-indigo-primary-color-text: #ffffff;
-    --p-primary-color: #5b49de;
-    --p-passive: #414661;
+    /* Mastodon-like indigo accent */
+    --p-primary-color: #5a65ea;
+    /* Subtle passive text color similar to Mastodon UI */
+    --p-passive: #9aa3b2;
+
+    /* Additional tokens for consistency */
+    --tp-bg: #191b22; /* timeline background */
+    --tp-card: #222531; /* card background */
+    --tp-border: #2c2f3a; /* separators */
+    --tp-text: #e6e9ef; /* primary text */
+    --tp-text-muted: #b6beca; /* secondary text */
+    --tp-link: #8fa1ff; /* link color */
   }
 }

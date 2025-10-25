@@ -68,7 +68,7 @@ export default defineComponent({
   <div class="toot-card">
     <div class="header">
       <div class="profile">
-        <Avatar :image="account.avatar" /><a
+        <Avatar class="avatar" :image="account.avatar" shape="circle" /><a
           :href="accountUrl"
           target="_blank"
           class="display-name"
@@ -107,24 +107,32 @@ export default defineComponent({
 .header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .toot-card {
-  padding: 1.3rem;
-  background: rgb(from var(--p-zinc-950) r g b / 0.25);
-  border-radius: 10px;
-  margin-bottom: 1rem;
+  padding: 0.875rem 1rem;
+  background: var(--tp-card);
+  border: 1px solid var(--tp-border);
+  border-radius: 12px;
+  margin-bottom: 0.75rem;
 }
 .profile {
   display: flex;
   align-items: center;
-  font-size: 1.5rem;
-  gap: 0.5rem;
+  gap: 0.75rem;
+}
+.avatar :deep(img) {
+  width: 46px;
+  height: 46px;
+}
+.display-name {
+  color: var(--tp-text);
+  font-weight: 700;
 }
 .bio {
-  font-size: 1.2rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  color: var(--tp-text-muted);
+  margin: 0.25rem 0 0.75rem;
 }
 </style>

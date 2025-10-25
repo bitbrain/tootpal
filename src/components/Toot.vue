@@ -48,14 +48,32 @@ export default defineComponent({
 
 <style scoped>
 .toot-text {
-  font-size: 0.8rem;
-  margin-top: 0.5rem;
-  color: rgb(from white r g b / 0.65);
+  margin-top: 0.25rem;
+  color: var(--tp-text);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+.toot-text :deep(p) {
+  margin: 0.25rem 0;
+}
+.toot-text :deep(a) {
+  color: var(--tp-link);
+}
+.toot-text :deep(.hashtag),
+.toot-text :deep(.mention) {
+  color: var(--tp-link);
+}
+.toot-text :deep(blockquote) {
+  margin: 0.5rem 0;
+  padding: 0.5rem 0.75rem;
+  border-left: 3px solid var(--tp-border);
+  color: var(--tp-text-muted);
+  background: rgba(255,255,255,0.02);
 }
 
 .media-attachments img {
   max-width: 100%;
-  border-radius: 0.5rem;
+  border-radius: 8px;
   margin-top: 0.5rem;
 }
 </style>
