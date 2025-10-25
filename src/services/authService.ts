@@ -1,7 +1,8 @@
 import { generateCodeChallenge, generateRandomString } from './utils'
 import { useAuthStore } from '@/stores/authStore'
 
-const scopes = 'read:follows write:follows read:accounts'
+// Include read:search to allow /api/v2/search checks for deep mode
+const scopes = 'read:follows write:follows read:accounts read:search'
 
 const authService = {
   async startOAuthFlow(instanceUrl: string, authStore: any) {

@@ -7,6 +7,7 @@ import Toot from './Toot.vue'
 import { useAuthStore } from '@/stores/authStore'
 import mastodonService from '@/services/mastodonService'
 import { useFollowStore } from '@/stores/followStore'
+import { useToast } from 'primevue/usetoast'
 
 export default defineComponent({
   name: 'TootCard',
@@ -29,21 +30,44 @@ export default defineComponent({
   setup(props) {
     const followStore = useFollowStore()
     const following = ref(false)
+    const toast = useToast()
 
     const accountUrl = props.account.url
 
     const followUser = async () => {
       try {
-        await mastodonService.followUser(props.account)
-        followStore.addFollower(props.account.id)
+        // Prefer acct-based follow if we only have remote data
+        const acctValue = props.account.acct as string | undefined
+        if (acctValue && typeof acctValue === 'string' && acctValue.includes('@')) {
+          const local = await mastodonService.followByAcct(acctValue)
+          followStore.addFollower(local.id, acctValue)
+        } else {
+          await mastodonService.followUser(props.account)
+          followStore.addFollower(props.account.id, acctValue)
+        }
         following.value = true
       } catch (error) {
-        console.error(error)
+        const e: any = error
+        if (e && e.rateLimited) {
+          let detail = 'Please try again later.'
+          if (e.retryAt) {
+            const seconds = Math.max(0, Math.ceil((e.retryAt - Date.now()) / 1000))
+            detail = `Retry in ~${seconds}s.`
+          }
+          toast.add({ severity: 'warn', summary: 'Too many requests', detail, life: 4000 })
+        } else {
+          toast.add({ severity: 'error', summary: 'Follow failed', detail: 'Unable to follow this account.', life: 4000 })
+        }
       }
     }
 
     const checkFollowing = async () => {
-      following.value = followStore.isFollowing(props.account.id)
+      const acctValue = (props.account as any).acct
+      if ((followStore as any).isFollowingAcct && acctValue) {
+        following.value = (followStore as any).isFollowingAcct(acctValue)
+      } else {
+        following.value = followStore.isFollowing(props.account.id)
+      }
     }
 
     watch(
@@ -59,6 +83,7 @@ export default defineComponent({
       followUser,
       accountUrl,
       toot: props.toot,
+      toast,
     }
   },
 })
